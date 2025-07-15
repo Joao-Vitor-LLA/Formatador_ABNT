@@ -1,44 +1,67 @@
 from docx import Document
-
-def separador(documento):
-    doc = Document(documento)
-    secoes = {}
-    secao_atual = None
-    buffer = []
+from docx.shared import Pt, Cm
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 
-    titulos = [
-        "SUMÁRIO",
-        "Coleta dos dados",
-        "Avaliação de Acessibilidade",
-        "Referências"
-    ]
+def aplicar_fonte_arial(run):
+    run.font.name = 'Arial'
+    run.font.size = Pt(12)
 
-    for p in doc.paragraphs:
-        texto = p.text.strip()
 
-        if not texto:
-            pass
+def formatador_abnt(documento):
+    for section in documento.sections:
+        section.top_margin = Cm(3)
+        section.bottom_margin = Cm(2)
+        section.left_margin = Cm(3)
+        section.right_margin = Cm(2)
+    for paragrafo in documento.paragraphs:
+        estilo = paragrafo.style.name
+        texto_original = paragrafo.text
 
-        if texto in titulos:
-            if secao_atual and buffer:
-                secoes[secao_atual] = "\n".join(buffer).strip()
-                buffer = []
-            secao_atual = texto
+        if estilo == "Heading 1":
+            paragrafo.text = texto_original.upper()
+            paragrafo.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            paragrafo.paragraph_format.line_spacing = 1.5
+            paragrafo.paragraph_format.space_after = Pt(12)
+            paragrafo.paragraph_format.first_line_indent = Pt(0)
+            for run in paragrafo.runs:
+                run.bold = True
+                aplicar_fonte_arial(run)
+                run.font.size = Pt(14)
+
+        elif estilo == "Heading 2":
+            paragrafo.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            paragrafo.paragraph_format.line_spacing = 1.5
+            paragrafo.paragraph_format.space_after = Pt(8)
+            paragrafo.paragraph_format.first_line_indent = Pt(0)
+            for run in paragrafo.runs:
+                run.bold = True
+                run.italic = True
+                aplicar_fonte_arial(run)
+
+        elif 'REFERÊNCIAS' in texto_original.upper():
+            paragrafo.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            paragrafo.paragraph_format.line_spacing = 1.0
+            paragrafo.paragraph_format.space_after = Pt(6)
+            paragrafo.paragraph_format.left_indent = Cm(1.25)
+            paragrafo.paragraph_format.first_line_indent = Cm(-1.25)
+            for run in paragrafo.runs:
+                run.bold = False
+                run.italic = False
+                aplicar_fonte_arial(run)
+
         else:
-            buffer.append(texto)
+            paragrafo.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            paragrafo.paragraph_format.line_spacing = 1.5
+            paragrafo.paragraph_format.space_after = Pt(0)
+            paragrafo.paragraph_format.first_line_indent = Cm(1.25)
+            for run in paragrafo.runs:
+                run.bold = False
+                run.italic = False
+                aplicar_fonte_arial(run)
+        print(paragrafo.text)
+    documento.save("teste_formatado.docx")
 
-
-    if secao_atual and buffer:
-        secoes[secao_atual] = "\n".join(buffer).strip()
-
-    return secoes  # <-- Faltava isso
-
-
-secoes = separador("teste.docx")
-
-
-for nome, conteudo in secoes.items():
-    print(f"=== {nome} ===")
-    print(conteudo)
-    print()
+doc = "teste.docx"
+documento = Document(doc)
+formatador_abnt(documento)
