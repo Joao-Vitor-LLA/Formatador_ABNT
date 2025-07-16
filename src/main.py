@@ -15,7 +15,7 @@ def aplicar_fonte(run):
     run.font.name = 'Arial'
     run.font.size = Pt(12)
 
-def formata_corpo_normal(paragrafo):
+def formata_titulo1(paragrafo):
     paragrafo.alignment = WD_ALIGN_PARAGRAPH.LEFT
     paragrafo.paragraph_format.line_spacing = 1.5
     paragrafo.paragraph_format.space_after = Pt(12)
@@ -23,21 +23,19 @@ def formata_corpo_normal(paragrafo):
     for run in paragrafo.runs:
         run.bold = True
         aplicar_fonte(run)
-        run.font.size = Pt(14)
     return paragrafo
 
-def formatar_corpo_sub(paragrafo):
+def formatar_titulo2(paragrafo):
     paragrafo.alignment = WD_ALIGN_PARAGRAPH.LEFT
     paragrafo.paragraph_format.line_spacing = 1.5
     paragrafo.paragraph_format.space_after = Pt(8)
     paragrafo.paragraph_format.first_line_indent = Pt(0)
     for run in paragrafo.runs:
         run.bold = True
-        run.italic = True
         aplicar_fonte(run)
     return paragrafo
 
-def formatar_referencias(paragrafo):
+def formatar_titulo_referencias(paragrafo):
     paragrafo.alignment = WD_ALIGN_PARAGRAPH.LEFT
     paragrafo.paragraph_format.line_spacing = 1.0
     paragrafo.paragraph_format.space_after = Pt(6)
@@ -45,7 +43,6 @@ def formatar_referencias(paragrafo):
     paragrafo.paragraph_format.first_line_indent = Cm(-1.25)
     for run in paragrafo.runs:
         run.bold = False
-        run.italic = False
         aplicar_fonte(run)
     return paragrafo
 
@@ -72,7 +69,6 @@ def formatar_corpo_texto(paragrafo):
         aplicar_fonte(run)
 
 def formatador_abnt(documento, nome):
-    # Define margens da página
     for section in documento.sections:
         section.top_margin = Cm(3)
         section.bottom_margin = Cm(2)
@@ -85,12 +81,12 @@ def formatador_abnt(documento, nome):
 
         if estilo == "Heading 1":
             if 'REFERÊNCIAS' in texto_original.upper():
-                formatar_referencias(paragrafo)
+                formatar_titulo_referencias(paragrafo)
             else:
-                formata_corpo_normal(paragrafo)
+                formata_titulo1(paragrafo)
 
         elif estilo == "Heading 2":
-            formatar_corpo_sub(paragrafo)
+            formatar_titulo2(paragrafo)
 
         elif texto_original.startswith('"') and texto_original.endswith('"') and len(texto_original.split()) >= 40:
             formatar_citacao_longa(paragrafo)
@@ -101,7 +97,6 @@ def formatador_abnt(documento, nome):
     documento.save(nome)
     print(f"\nDocumento formatado salvo como {nome}")
 
-# Execução do script
 doc = "teste.docx"
 documento = Document(doc)
 sec = separador_titulos(documento)
